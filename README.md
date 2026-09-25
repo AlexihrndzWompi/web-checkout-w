@@ -27,6 +27,7 @@ publicado en **GitHub Pages**.
 
 ```
 web_checkout/
+├── login.html        # Pantalla de acceso (pide la clave antes de entrar)
 ├── index.html        # Interfaz única (UI + logica)
 ├── config.js         # "Archivo de configuracion" por ambiente (define window.WOMPI_CONFIG)
 ├── widget.html       # Ejemplo original del widget (referencia)
@@ -102,6 +103,18 @@ npx serve .
 
 Como el `index.html` usa rutas relativas (`config.js`), funciona aunque Pages
 publique bajo un subpath.
+
+## Acceso
+
+La app abre en `login.html` y pide una clave antes de mostrar las opciones de pago.
+
+- La clave se define en `config.js` (`accessKey`).
+- Al validar, se guarda un flag en `localStorage` y se redirige a `index.html`.
+- El acceso **no expira** (persiste hasta borrar los datos del navegador).
+- `index.html` verifica el flag al cargar; si no existe, vuelve a `login.html`.
+
+> Nota: al ser una app estática, la clave es visible en el código fuente. Es una
+> barrera visual para evitar accesos casuales, **no** un control de seguridad real.
 
 ## Seguridad
 

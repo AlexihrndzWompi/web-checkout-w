@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Acceso · Pagos Wompi</title>
+  <!-- Configuracion (define window.WOMPI_CONFIG con accessKey y authStorageKey) -->
+  <script src="config.js"></script>
+  <style>
+    :root {
+      --azul: #2c68f6;
+      --texto: #1a1a2e;
+      --borde: #e2e5ec;
+      --error: #d92d20;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f5f6fa;
+      color: var(--texto);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid var(--borde);
+      border-radius: 16px;
+      padding: 32px;
+      width: 100%;
+      max-width: 380px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+    }
+
+    h1 {
+      margin: 0 0 4px;
+      font-size: 22px;
+    }
+
+    .subtitle {
+      margin: 0 0 24px;
+      color: #6b7280;
+      font-size: 14px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: #6b7280;
+      margin-bottom: 6px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--borde);
+      border-radius: 10px;
+      font-size: 15px;
+      font-family: inherit;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--azul);
+    }
+
+    input.error {
+      border-color: var(--error);
+    }
+
+    .msg-error {
+      display: none;
+      color: var(--error);
+      font-size: 13px;
+      margin-top: 8px;
+    }
+
+    .msg-error.visible { display: block; }
+
+    .btn {
+      width: 100%;
+      margin-top: 20px;
+      padding: 14px 18px;
+      font-size: 15px;
+      font-weight: 600;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      background: var(--azul);
+      color: #fff;
+      transition: transform 0.05s ease;
+    }
+
+    .btn:active { transform: scale(0.98); }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Acceso</h1>
+    <p class="subtitle">Ingresa la clave para continuar</p>
+
+    <form id="login-form" autocomplete="off">
+      <label for="access-key">Clave</label>
+      <input type="password" id="access-key" autofocus />
+      <p class="msg-error" id="msg-error">Clave incorrecta. Intenta de nuevo.</p>
+      <button type="submit" class="btn">Entrar</button>
+    </form>
+  </div>
+
+  <script>
+    (function () {
+      var cfg = window.WOMPI_CONFIG || {};
+      var STORAGE_KEY = cfg.authStorageKey || "wompi_demo_auth";
+      var ACCESS_KEY = cfg.accessKey || "";
+
+      // Si ya esta autenticado, ir directo a la app
+      try {
+        if (localStorage.getItem(STORAGE_KEY) === "true") {
+          window.location.replace("index.html");
+          return;
+        }
+      } catch (e) { /* localStorage no disponible: seguir mostrando login */ }
+
+      var form = document.getElementById("login-form");
+      var input = document.getElementById("access-key");
+      var error = document.getElementById("msg-error");
+
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        if (input.value === ACCESS_KEY && ACCESS_KEY !== "") {
+          try { localStorage.setItem(STORAGE_KEY, "true"); } catch (e) {}
+          window.location.replace("index.html");
+        } else {
+          error.classList.add("visible");
+          input.classList.add("error");
+          input.select();
+        }
+      });
+
+      // Ocultar el error al volver a escribir
+      input.addEventListener("input", function () {
+        error.classList.remove("visible");
+        input.classList.remove("error");
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -6,6 +6,20 @@
   <title>Pagos Wompi</title>
   <!-- Configuracion por ambiente (define window.WOMPI_CONFIG) -->
   <script src="config.js"></script>
+  <!-- Guard de acceso: si no hay sesion valida, redirige al login -->
+  <script>
+    (function () {
+      var cfg = window.WOMPI_CONFIG || {};
+      var STORAGE_KEY = cfg.authStorageKey || "wompi_demo_auth";
+      try {
+        if (localStorage.getItem(STORAGE_KEY) !== "true") {
+          window.location.replace("login.html");
+        }
+      } catch (e) {
+        window.location.replace("login.html");
+      }
+    })();
+  </script>
   <style>
     :root {
       --azul: #2c68f6;

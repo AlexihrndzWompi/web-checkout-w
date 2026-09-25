@@ -8,6 +8,13 @@
  * NUNCA agregar aqui llaves privadas ni el secreto de integridad.
  */
 window.WOMPI_CONFIG = {
+  // --- Acceso ---
+  // Clave para entrar a la demo. Es una barrera visual, no seguridad real:
+  // al ser una app estatica, la clave es visible en el codigo fuente.
+  accessKey: "GF2026",
+  // Clave de localStorage donde se marca la sesion como autenticada.
+  authStorageKey: "wompi_demo_auth",
+
   defaultEnvironment: "dev",
   environments: {
     dev: {
