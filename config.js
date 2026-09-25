@@ -29,6 +29,10 @@ window.WOMPI_CONFIG = {
         action: "https://checkout.co.dev.wompi.dev/p/",
         amountInCents: 150000
       },
+      // Link de pago: URL fija, el usuario llena todos los datos en el checkout.
+      paymentLink: {
+        url: "https://checkout.co.dev.wompi.dev/l/devint_VPOS_pH7Opi"
+      },
       customerData: {
         email: "lola@perez.com",
         fullName: "Lola Perez",
@@ -49,6 +53,10 @@ window.WOMPI_CONFIG = {
       webCheckout: {
         action: "https://checkout.co.uat.wompi.dev/p/",
         amountInCents: 150000
+      },
+      // Link de pago: URL fija, el usuario llena todos los datos en el checkout.
+      paymentLink: {
+        url: "https://checkout.co.uat.wompi.dev/l/stagint_VPOS_hADAr6"
       },
       customerData: {
         email: "lola@perez.com",

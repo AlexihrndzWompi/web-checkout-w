@@ -200,6 +200,12 @@
       background: #fff;
       color: var(--verde);
       border: 2px solid var(--verde);
+      margin-bottom: 12px;
+    }
+
+    .btn-paymentlink {
+      background: #6b3fd4;
+      color: #fff;
     }
 
     #widget-container {
@@ -279,6 +285,10 @@
         <label>Web Checkout amount-in-cents</label>
         <input type="number" id="c-wc-amount" />
       </div>
+      <div class="field">
+        <label>Link de pago (URL)</label>
+        <input type="text" id="c-paymentlink-url" />
+      </div>
     </div>
 
     <!-- Datos del pagador (customer-data) - siempre visibles y editables -->
@@ -343,6 +353,11 @@
       <input type="hidden" name="customer-data:legal-id-type" />
     </form>
 
+    <!-- Botón: Link de pago (URL fija por ambiente, sin datos precargados) -->
+    <button type="button" id="btn-paymentlink" class="btn btn-paymentlink" disabled>
+      Link de pago
+    </button>
+
     <div class="divider">o</div>
 
     <!-- El widget de Wompi renderiza aqui su boton "Paga con Wompi" -->
@@ -393,7 +408,8 @@
       widgetSrc: document.getElementById("c-widget-src"),
       widgetAmount: document.getElementById("c-widget-amount"),
       wcAction: document.getElementById("c-wc-action"),
-      wcAmount: document.getElementById("c-wc-amount")
+      wcAmount: document.getElementById("c-wc-amount"),
+      paymentLinkUrl: document.getElementById("c-paymentlink-url")
     };
 
     // Referencias DOM de los datos del pagador (siempre visibles)
@@ -481,6 +497,7 @@
       customInputs.widgetAmount.value = env.widget.amountInCents || "";
       customInputs.wcAction.value = env.webCheckout.action || "";
       customInputs.wcAmount.value = env.webCheckout.amountInCents || "";
+      customInputs.paymentLinkUrl.value = (env.paymentLink && env.paymentLink.url) || "";
     }
 
     /** Construye un objeto de ambiente leyendo el panel custom */
@@ -496,6 +513,9 @@
         webCheckout: {
           action: customInputs.wcAction.value.trim(),
           amountInCents: Number(customInputs.wcAmount.value)
+        },
+        paymentLink: {
+          url: customInputs.paymentLinkUrl.value.trim()
         }
       };
     }
@@ -586,11 +606,27 @@
       });
     }
 
-    /** Conecta el boton de web checkout (el widget se renderiza solo) */
+    /** Conecta los botones (el widget se renderiza solo) */
     function wireButtons() {
       const btnWc = document.getElementById("btn-webcheckout");
       btnWc.disabled = false;
       btnWc.addEventListener("click", onWebCheckout);
+
+      const btnLink = document.getElementById("btn-paymentlink");
+      btnLink.disabled = false;
+      btnLink.addEventListener("click", onPaymentLink);
+    }
+
+    /** LINK DE PAGO: abre la URL fija del ambiente en una pestana nueva. */
+    function onPaymentLink() {
+      if (!activeConfig) return;
+      const link = activeConfig.paymentLink && activeConfig.paymentLink.url;
+      if (!link) {
+        showError("No hay URL de link de pago configurada para este ambiente.");
+        return;
+      }
+      showReference("Link de pago", currentEnvKey(), "(sin reference)");
+      window.open(link, "_blank", "noopener");
     }
 
     function currentEnvKey() {

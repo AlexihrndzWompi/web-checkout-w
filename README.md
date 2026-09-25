@@ -6,6 +6,8 @@ Interfaz única y estática para probar los dos métodos de integración de pago
 - **Widget** — el pago se completa dentro de la misma página (modal / iframe).
 - **Web Checkout** — redirige al checkout de Wompi mediante un formulario `GET`
   (se abre en una pestaña nueva).
+- **Link de pago** — abre una URL de link de pago fija por ambiente en una pestaña
+  nueva; el usuario llena todos los datos en el checkout (sin datos precargados).
 
 No requiere backend ni proceso de build: es HTML + JavaScript + un `config.js`.
 Funciona abriendo el `index.html` directamente (doble clic, `file://`) y también
@@ -72,6 +74,7 @@ window.WOMPI_CONFIG = {
 | `widget.src` | URL del `widget.js` del ambiente. |
 | `widget.amountInCents` / `webCheckout.amountInCents` | Monto en centavos. |
 | `webCheckout.action` | URL del checkout web (`/p/`) del ambiente. |
+| `paymentLink.url` | URL del link de pago (`/l/...`) del ambiente. |
 | `customerData.*` | Datos del pagador que se prellenan en el checkout. |
 
 ## Uso local
