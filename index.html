@@ -188,19 +188,6 @@
       border: 2px solid var(--verde);
     }
 
-    .ref-info {
-      margin-top: 20px;
-      padding: 12px;
-      background: #f0f4ff;
-      border-radius: 8px;
-      font-size: 12px;
-      color: #4b5563;
-      word-break: break-all;
-      min-height: 18px;
-    }
-
-    .ref-info strong { color: var(--texto); }
-
     #widget-container {
       margin: 0;
       display: flex;
@@ -346,10 +333,6 @@
 
     <!-- El widget de Wompi renderiza aqui su boton "Paga con Wompi" -->
     <div id="widget-container"></div>
-
-    <div class="ref-info" id="ref-info">
-      Widget listo. El reference se asigna al abrir/actualizar.
-    </div>
   </div>
 
   <script>
@@ -376,12 +359,12 @@
     }
 
     function showReference(metodo, ambiente, reference) {
-      document.getElementById("ref-info").innerHTML =
-        "<strong>" + metodo + " · " + ambiente.toUpperCase() + "</strong><br>reference: " + reference;
+      // Panel de info removido; se deja traza en consola para depuracion.
+      console.log("[Wompi] " + metodo + " · " + ambiente.toUpperCase() + " · reference: " + reference);
     }
 
     function showError(msg) {
-      document.getElementById("ref-info").innerHTML = "<strong>Error</strong><br>" + msg;
+      console.error("[Wompi] " + msg.replace(/<[^>]*>/g, " "));
     }
 
     // Estado
