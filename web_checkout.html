@@ -1,0 +1,15 @@
+<form action="https://checkout.co.dev.wompi.dev/p/" method="GET">
+  <!-- OBLIGATORIOS -->
+  <input type="hidden" name="public-key" value="pub_devint_JHVQ9g9LnX51d9tedCRRYrWa1TIht4aT" />
+  <input type="hidden" name="currency" value="COP" />
+  <input type="hidden" name="amount-in-cents" value="150000" />
+  <input type="hidden" name="reference" value="REFERENCIA_DE_PAGO-20260925-002" />
+  <!--input type="hidden" name="signature:integrity" value="devint_integrity_1vP2U49aalAnOqqtpdczaU2kCAkcuXWE" /-->
+  <!-- OPCIONALES -->
+   <input
+    type="hidden"
+    name="customer-data:full-name"
+    value="NOMBRE DEL PAGADOR"
+  />
+  <button type="submit">Pagar con Wompi</button>
+</form>

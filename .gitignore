@@ -1,0 +1,24 @@
+# Artefactos de pruebas de navegador (Playwright MCP)
+.playwright-mcp/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Editores / IDE
+.vscode/
+.idea/
+*.swp
+
+# Logs
+*.log
+
+# Dependencias (por si en el futuro se agrega tooling)
+node_modules/
+
+# Secretos: NUNCA subir llaves privadas ni secretos de integridad.
+# El config.json SI se versiona porque solo contiene llaves publicas de Wompi.
+.env
+.env.*
+*.secret
+*-private.json

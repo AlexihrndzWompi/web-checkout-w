@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pagos Wompi</title>
+  <!-- Configuracion por ambiente (define window.WOMPI_CONFIG) -->
+  <script src="config.js"></script>
+  <style>
+    :root {
+      --azul: #2c68f6;
+      --verde: #12a150;
+      --texto: #1a1a2e;
+      --borde: #e2e5ec;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f5f6fa;
+      color: var(--texto);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid var(--borde);
+      border-radius: 16px;
+      padding: 32px;
+      width: 100%;
+      max-width: 460px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+    }
+
+    h1 {
+      margin: 0 0 4px;
+      font-size: 22px;
+    }
+
+    .subtitle {
+      margin: 0 0 20px;
+      color: #6b7280;
+      font-size: 14px;
+    }
+
+    /* Selector de ambiente */
+    .env-selector {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .env-selector label {
+      flex: 1;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .env-selector input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .env-selector .pill {
+      display: block;
+      text-align: center;
+      padding: 10px;
+      border: 2px solid var(--borde);
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #6b7280;
+      transition: all 0.15s ease;
+    }
+
+    .env-selector input:checked + .pill {
+      border-color: var(--azul);
+      color: var(--azul);
+      background: #f0f4ff;
+    }
+
+    .env-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: #6b7280;
+      margin-bottom: 8px;
+    }
+
+    /* Panel custom */
+    .custom-panel {
+      display: none;
+      border: 1px dashed var(--borde);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 16px;
+      background: #fafbfc;
+    }
+
+    .custom-panel.visible { display: block; }
+
+    .field {
+      margin-bottom: 10px;
+    }
+
+    .field:last-child { margin-bottom: 0; }
+
+    .field label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      color: #6b7280;
+      margin-bottom: 3px;
+    }
+
+    .field input {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid var(--borde);
+      border-radius: 8px;
+      font-size: 13px;
+      font-family: inherit;
+    }
+
+    .field input,
+    .field select {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid var(--borde);
+      border-radius: 8px;
+      font-size: 13px;
+      font-family: inherit;
+      background: #fff;
+    }
+
+    .field input:focus,
+    .field select:focus {
+      outline: none;
+      border-color: var(--azul);
+    }
+
+    /* Panel de datos del pagador */
+    .customer-panel {
+      border: 1px solid var(--borde);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 16px;
+      background: #fafbfc;
+    }
+
+    .field-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .field-row .field { flex: 1; }
+    .field-prefix { flex: 0 0 80px !important; }
+    .field-idtype { flex: 0 0 100px !important; }
+
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 14px 18px;
+      font-size: 15px;
+      font-weight: 600;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.05s ease, opacity 0.2s ease;
+    }
+
+    .btn:active { transform: scale(0.98); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-webcheckout {
+      background: #fff;
+      color: var(--verde);
+      border: 2px solid var(--verde);
+    }
+
+    .ref-info {
+      margin-top: 20px;
+      padding: 12px;
+      background: #f0f4ff;
+      border-radius: 8px;
+      font-size: 12px;
+      color: #4b5563;
+      word-break: break-all;
+      min-height: 18px;
+    }
+
+    .ref-info strong { color: var(--texto); }
+
+    #widget-container {
+      margin: 0;
+      display: flex;
+      justify-content: center;
+    }
+    #widget-container form {
+      margin: 0;
+      display: flex;
+      justify-content: center;
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      color: #9ca3af;
+      font-size: 12px;
+      margin: 12px 0;
+    }
+    .divider::before,
+    .divider::after {
+      content: "";
+      flex: 1;
+      border-bottom: 1px solid var(--borde);
+    }
+    .divider:not(:empty)::before { margin-right: 12px; }
+    .divider:not(:empty)::after { margin-left: 12px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Pagar con Wompi</h1>
+    <p class="subtitle">Selecciona ambiente y metodo de pago</p>
+
+    <!-- Selector de ambiente -->
+    <span class="env-label">Ambiente</span>
+    <div class="env-selector" id="env-selector">
+      <label>
+        <input type="radio" name="env" value="dev" checked />
+        <span class="pill">DEV</span>
+      </label>
+      <label>
+        <input type="radio" name="env" value="uat" />
+        <span class="pill">UAT</span>
+      </label>
+      <label>
+        <input type="radio" name="env" value="custom" />
+        <span class="pill">CUSTOM</span>
+      </label>
+    </div>
+
+    <!-- Panel de edicion custom -->
+    <div class="custom-panel" id="custom-panel">
+      <div class="field">
+        <label>Public Key</label>
+        <input type="text" id="c-publicKey" />
+      </div>
+      <div class="field">
+        <label>Currency</label>
+        <input type="text" id="c-currency" />
+      </div>
+      <div class="field">
+        <label>Widget src</label>
+        <input type="text" id="c-widget-src" />
+      </div>
+      <div class="field">
+        <label>Widget amount-in-cents</label>
+        <input type="number" id="c-widget-amount" />
+      </div>
+      <div class="field">
+        <label>Web Checkout action</label>
+        <input type="text" id="c-wc-action" />
+      </div>
+      <div class="field">
+        <label>Web Checkout amount-in-cents</label>
+        <input type="number" id="c-wc-amount" />
+      </div>
+    </div>
+
+    <!-- Datos del pagador (customer-data) - siempre visibles y editables -->
+    <span class="env-label">Datos del pagador</span>
+    <div class="customer-panel" id="customer-panel">
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="cd-email" />
+      </div>
+      <div class="field">
+        <label>Nombre completo</label>
+        <input type="text" id="cd-fullName" />
+      </div>
+      <div class="field-row">
+        <div class="field field-prefix">
+          <label>Prefijo</label>
+          <input type="text" id="cd-phonePrefix" placeholder="+57" />
+        </div>
+        <div class="field field-phone">
+          <label>Telefono</label>
+          <input type="text" id="cd-phoneNumber" />
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field field-idtype">
+          <label>Tipo doc.</label>
+          <select id="cd-legalIdType">
+            <option value="">--</option>
+            <option value="CC">CC</option>
+            <option value="CE">CE</option>
+            <option value="NIT">NIT</option>
+            <option value="PP">PP</option>
+            <option value="TI">TI</option>
+            <option value="DNI">DNI</option>
+            <option value="RG">RG</option>
+            <option value="OTHER">OTHER</option>
+          </select>
+        </div>
+        <div class="field field-id">
+          <label>Documento</label>
+          <input type="text" id="cd-legalId" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Botón 1: Web Checkout (redirect por form GET) -->
+    <button type="button" id="btn-webcheckout" class="btn btn-webcheckout" disabled>
+      Pagar con Web Checkout
+    </button>
+
+    <!-- Formulario oculto para el redirect del Web Checkout -->
+    <form id="webcheckout-form" method="GET" target="_blank" rel="noopener" style="display:none">
+      <input type="hidden" name="public-key" />
+      <input type="hidden" name="currency" />
+      <input type="hidden" name="amount-in-cents" />
+      <input type="hidden" name="reference" />
+      <input type="hidden" name="customer-data:email" />
+      <input type="hidden" name="customer-data:full-name" />
+      <input type="hidden" name="customer-data:phone-number" />
+      <input type="hidden" name="customer-data:phone-number-prefix" />
+      <input type="hidden" name="customer-data:legal-id" />
+      <input type="hidden" name="customer-data:legal-id-type" />
+    </form>
+
+    <div class="divider">o</div>
+
+    <!-- El widget de Wompi renderiza aqui su boton "Paga con Wompi" -->
+    <div id="widget-container"></div>
+
+    <div class="ref-info" id="ref-info">
+      Widget listo. El reference se asigna al abrir/actualizar.
+    </div>
+  </div>
+
+  <script>
+    const REF_PREFIX = "REF-GF-";
+
+    /** Genera un timestamp legible: YYYYMMDD-HHMMSS */
+    function buildTimestamp() {
+      const d = new Date();
+      const pad = (n) => String(n).padStart(2, "0");
+      return (
+        d.getFullYear() +
+        pad(d.getMonth() + 1) +
+        pad(d.getDate()) +
+        "-" +
+        pad(d.getHours()) +
+        pad(d.getMinutes()) +
+        pad(d.getSeconds())
+      );
+    }
+
+    /** Construye el reference dinamico: REF-GF-{{timestamp}} */
+    function buildReference() {
+      return REF_PREFIX + buildTimestamp();
+    }
+
+    function showReference(metodo, ambiente, reference) {
+      document.getElementById("ref-info").innerHTML =
+        "<strong>" + metodo + " · " + ambiente.toUpperCase() + "</strong><br>reference: " + reference;
+    }
+
+    function showError(msg) {
+      document.getElementById("ref-info").innerHTML = "<strong>Error</strong><br>" + msg;
+    }
+
+    // Estado
+    let config = null;        // config.js completo (window.WOMPI_CONFIG)
+    let activeConfig = null;  // ambiente seleccionado resuelto
+
+    // Referencias DOM del panel custom
+    const customPanel = document.getElementById("custom-panel");
+    const customInputs = {
+      publicKey: document.getElementById("c-publicKey"),
+      currency: document.getElementById("c-currency"),
+      widgetSrc: document.getElementById("c-widget-src"),
+      widgetAmount: document.getElementById("c-widget-amount"),
+      wcAction: document.getElementById("c-wc-action"),
+      wcAmount: document.getElementById("c-wc-amount")
+    };
+
+    // Referencias DOM de los datos del pagador (siempre visibles)
+    const customerInputs = {
+      email: document.getElementById("cd-email"),
+      fullName: document.getElementById("cd-fullName"),
+      phoneNumber: document.getElementById("cd-phoneNumber"),
+      phoneNumberPrefix: document.getElementById("cd-phonePrefix"),
+      legalId: document.getElementById("cd-legalId"),
+      legalIdType: document.getElementById("cd-legalIdType")
+    };
+
+    /** Rellena los campos del pagador desde un objeto customerData */
+    function fillCustomerPanel(cd) {
+      cd = cd || {};
+      customerInputs.email.value = cd.email || "";
+      customerInputs.fullName.value = cd.fullName || "";
+      customerInputs.phoneNumber.value = cd.phoneNumber || "";
+      customerInputs.phoneNumberPrefix.value = cd.phoneNumberPrefix || "";
+      customerInputs.legalId.value = cd.legalId || "";
+      customerInputs.legalIdType.value = cd.legalIdType || "";
+    }
+
+    /** Lee los campos del pagador y devuelve un objeto customerData */
+    function readCustomerPanel() {
+      return {
+        email: customerInputs.email.value.trim(),
+        fullName: customerInputs.fullName.value.trim(),
+        phoneNumber: customerInputs.phoneNumber.value.trim(),
+        phoneNumberPrefix: customerInputs.phoneNumberPrefix.value.trim(),
+        legalId: customerInputs.legalId.value.trim(),
+        legalIdType: customerInputs.legalIdType.value.trim()
+      };
+    }
+
+    /**
+     * Mapa: clave interna de customerData -> sufijo del atributo Wompi
+     * (data-customer-data:<sufijo> y name="customer-data:<sufijo>")
+     */
+    const CUSTOMER_ATTR_MAP = {
+      email: "email",
+      fullName: "full-name",
+      phoneNumber: "phone-number",
+      phoneNumberPrefix: "phone-number-prefix",
+      legalId: "legal-id",
+      legalIdType: "legal-id-type"
+    };
+
+    /**
+     * Carga la configuracion desde config.js (window.WOMPI_CONFIG).
+     * Se usa un <script src="config.js"> en vez de fetch para que la pagina
+     * funcione tanto abriendo el index.html directo (file://) como en un servidor.
+     */
+    function loadConfig() {
+      try {
+        config = window.WOMPI_CONFIG;
+        if (!config || !config.environments) {
+          throw new Error("config.js no definio window.WOMPI_CONFIG");
+        }
+
+        // Selecciona el ambiente por defecto en el radio
+        const def = config.defaultEnvironment || "dev";
+        const radio = document.querySelector('input[name="env"][value="' + def + '"]');
+        if (radio) radio.checked = true;
+
+        applyEnvironment(def);
+        wireEnvSelector();
+        wireButtons();
+      } catch (err) {
+        showError("No se pudo cargar la configuracion: " + err.message +
+          "<br>Verifica que config.js este presente y bien formado.");
+      }
+    }
+
+    /** Clona un objeto de ambiente para no mutar el config original */
+    function cloneEnv(env) {
+      return JSON.parse(JSON.stringify(env));
+    }
+
+    /** Rellena el panel custom con los valores de un ambiente */
+    function fillCustomPanel(env) {
+      customInputs.publicKey.value = env.publicKey || "";
+      customInputs.currency.value = env.currency || "";
+      customInputs.widgetSrc.value = env.widget.src || "";
+      customInputs.widgetAmount.value = env.widget.amountInCents || "";
+      customInputs.wcAction.value = env.webCheckout.action || "";
+      customInputs.wcAmount.value = env.webCheckout.amountInCents || "";
+    }
+
+    /** Construye un objeto de ambiente leyendo el panel custom */
+    function readCustomPanel() {
+      return {
+        label: "CUSTOM",
+        publicKey: customInputs.publicKey.value.trim(),
+        currency: customInputs.currency.value.trim(),
+        widget: {
+          src: customInputs.widgetSrc.value.trim(),
+          amountInCents: Number(customInputs.widgetAmount.value)
+        },
+        webCheckout: {
+          action: customInputs.wcAction.value.trim(),
+          amountInCents: Number(customInputs.wcAmount.value)
+        }
+      };
+    }
+
+    /** Aplica el ambiente seleccionado y actualiza activeConfig */
+    function applyEnvironment(envKey) {
+      if (envKey === "custom") {
+        customPanel.classList.add("visible");
+        // Si aun no hay valores, precarga con el ultimo ambiente resuelto (o dev)
+        if (!customInputs.publicKey.value) {
+          const base = activeConfig || config.environments[config.defaultEnvironment || "dev"];
+          fillCustomPanel(base);
+        }
+        // En custom, los datos del pagador conservan lo que ya tenga el panel
+        activeConfig = readCustomPanel();
+        activeConfig.customerData = readCustomerPanel();
+      } else {
+        customPanel.classList.remove("visible");
+        const env = config.environments[envKey];
+        if (!env) {
+          showError("Ambiente '" + envKey + "' no existe en config.js");
+          return;
+        }
+        activeConfig = cloneEnv(env);
+        // Precarga los datos del pagador definidos para este ambiente
+        fillCustomerPanel(env.customerData);
+        activeConfig.customerData = readCustomerPanel();
+      }
+
+      // Regenera el boton nativo del widget con la config/reference actualizados
+      renderWidget();
+    }
+
+    /** Escucha cambios en el selector de ambiente */
+    function wireEnvSelector() {
+      document.querySelectorAll('input[name="env"]').forEach((radio) => {
+        radio.addEventListener("change", (e) => {
+          applyEnvironment(e.target.value);
+        });
+      });
+
+      // En modo custom, cualquier edicion del panel actualiza activeConfig en vivo
+      Object.values(customInputs).forEach((input) => {
+        input.addEventListener("input", () => {
+          const selected = document.querySelector('input[name="env"]:checked').value;
+          if (selected === "custom") {
+            const cd = readCustomerPanel();
+            activeConfig = readCustomPanel();
+            activeConfig.customerData = cd;
+            renderWidget();
+          }
+        });
+      });
+
+      // Los datos del pagador siempre editables: actualizan activeConfig y regeneran el widget
+      Object.values(customerInputs).forEach((input) => {
+        const sync = () => {
+          if (activeConfig) {
+            activeConfig.customerData = readCustomerPanel();
+            renderWidget();
+          }
+        };
+        input.addEventListener("input", sync);
+        input.addEventListener("change", sync);
+      });
+    }
+
+    /**
+     * Aplica los customer-data a un elemento (script del widget o inputs del form).
+     * mode = "widget" -> data-customer-data:<attr>
+     * mode = "webcheckout" -> agrega inputs hidden name="customer-data:<attr>"
+     */
+    function applyCustomerData(target, mode, customerData) {
+      if (!customerData) return;
+      Object.keys(CUSTOMER_ATTR_MAP).forEach((key) => {
+        const value = customerData[key];
+        if (!value) return; // solo se envian los que tienen valor
+        const attr = CUSTOMER_ATTR_MAP[key];
+        if (mode === "widget") {
+          target.setAttribute("data-customer-data:" + attr, value);
+        } else {
+          const input = document.createElement("input");
+          input.type = "hidden";
+          input.name = "customer-data:" + attr;
+          input.value = value;
+          target.appendChild(input);
+        }
+      });
+    }
+
+    /** Conecta el boton de web checkout (el widget se renderiza solo) */
+    function wireButtons() {
+      const btnWc = document.getElementById("btn-webcheckout");
+      btnWc.disabled = false;
+      btnWc.addEventListener("click", onWebCheckout);
+    }
+
+    function currentEnvKey() {
+      return document.querySelector('input[name="env"]:checked').value;
+    }
+
+    /** WEB CHECKOUT: arma el form GET con el reference dinamico y redirige */
+    function onWebCheckout() {
+      if (!activeConfig) return;
+      const form = document.getElementById("webcheckout-form");
+      const reference = buildReference();
+
+      form.action = activeConfig.webCheckout.action;
+      form.querySelector('[name="public-key"]').value = activeConfig.publicKey;
+      form.querySelector('[name="currency"]').value = activeConfig.currency;
+      form.querySelector('[name="amount-in-cents"]').value = activeConfig.webCheckout.amountInCents;
+      form.querySelector('[name="reference"]').value = reference;
+
+      // customer-data: setea los inputs hidden ya presentes en el form
+      const cd = activeConfig.customerData || {};
+      Object.keys(CUSTOMER_ATTR_MAP).forEach((key) => {
+        const input = form.querySelector('[name="customer-data:' + CUSTOMER_ATTR_MAP[key] + '"]');
+        if (input) input.value = cd[key] || "";
+      });
+
+      showReference("Web Checkout", currentEnvKey(), reference);
+      form.submit();
+    }
+
+    /**
+     * WIDGET: (re)inyecta el script del widget de Wompi, que renderiza su propio
+     * boton "Paga con Wompi". Se llama al cargar y cada vez que cambia el ambiente
+     * o los datos, para que el data-reference este siempre fresco.
+     */
+    function renderWidget() {
+      if (!activeConfig) return;
+      const container = document.getElementById("widget-container");
+      const reference = buildReference();
+
+      container.innerHTML = "";
+
+      const form = document.createElement("form");
+      const script = document.createElement("script");
+      script.src = activeConfig.widget.src;
+      script.setAttribute("data-render", "button");
+      script.setAttribute("data-public-key", activeConfig.publicKey);
+      script.setAttribute("data-currency", activeConfig.currency);
+      script.setAttribute("data-amount-in-cents", activeConfig.widget.amountInCents);
+      script.setAttribute("data-reference", reference);
+
+      // customer-data: agrega los atributos data-customer-data:<attr> con valor
+      applyCustomerData(script, "widget", activeConfig.customerData);
+
+      form.appendChild(script);
+      container.appendChild(form);
+    }
+
+    loadConfig();
+  </script>
+</body>
+</html>
